@@ -4,8 +4,9 @@ import { Observable } from 'rxjs';
 import {
   Alert, DashboardSummary, Dictamen, ImportResult, Licitacion, Memo, Partida, Period, Person, Warehouse, WarehouseBalance,
 } from './models';
+import { environment } from '../../environments/environment';
 
-const BASE = '/api';
+const BASE = environment.apiUrl;
 
 /** Único punto de contacto con la API. */
 @Injectable({ providedIn: 'root' })

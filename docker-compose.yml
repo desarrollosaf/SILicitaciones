@@ -1,0 +1,79 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: licitaciones-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: licitaciones
+      MYSQL_USER: licitaciones
+      MYSQL_PASSWORD: licitaciones
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  backend:
+    image: node:24-alpine
+    container_name: licitaciones-backend
+    working_dir: /app
+
+    ports:
+      - "3065:3000"
+
+    volumes:
+      - ./frontend/backend:/app
+      - backend_node_modules:/app/node_modules
+
+    env_file:
+      - ./frontend/backend/.env
+
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: mysql
+
+    depends_on:
+      - mysql
+
+    command: >
+      sh -c "npm install &&
+      npm run start:dev"
+
+    restart: unless-stopped
+
+  frontend:
+    image: node:24-alpine
+    container_name: licitaciones-frontend
+    working_dir: /app
+
+    ports:
+      - "4220:4200"
+
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+      - /app/backend
+
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      BACKEND_HOST: backend
+      BACKEND_PORT: "3000"
+
+    command: >
+      sh -c "npm install &&
+      npm run start --
+      --host 0.0.0.0
+      --port 4200
+      --poll=1000"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  frontend_node_modules:
+  backend_node_modules:

@@ -1,0 +1,24 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: DockerFile
+      args:
+        BASE_HREF: /licitaciones/
+    container_name: licitaciones-frontend
+    ports:
+      - "8094:80"
+    restart: always
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./frontend/backend
+      dockerfile: DockerFile
+    container_name: licitaciones-backend
+    ports:
+      - "3044:3000"
+    env_file:
+      - ./frontend/backend/.env
+    restart: always

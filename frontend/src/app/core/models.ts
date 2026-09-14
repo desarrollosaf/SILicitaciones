@@ -159,3 +159,15 @@ export interface ImportResult {
   rejected: number;
   notes: string[];
 }
+
+export type DocumentEntityType = 'dictamen' | 'partida';
+
+export interface DocumentMetadata {
+  id: string;
+  entity: DocumentEntityType;
+  entityId: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
+}

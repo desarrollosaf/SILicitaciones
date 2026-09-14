@@ -140,6 +140,15 @@ td.nowrap, th.nowrap { white-space: nowrap; }
 .hint { grid-column: span 2; background: var(--navy-100); border-radius: 9px; padding: 10px 12px; font-size: .78rem; color: var(--navy-700); }
 .hint.warn { background: var(--amber-100); color: var(--amber-600); }
 
+.attachment-list { display: grid; gap: 6px; margin-bottom: 8px; }
+.attachment-row {
+  display: flex; align-items: center; gap: 10px; padding: 7px 10px;
+  border: 1px solid var(--line); border-radius: 8px; font-size: .8rem;
+}
+.attachment-row a { color: var(--navy-700); font-weight: 600; }
+.attachment-row a:hover { text-decoration: underline; }
+.attachment-row .muted { margin-left: auto; }
+
 .toast-stack { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 8px; z-index: 40; }
 .toast { background: var(--navy-900); color: #fff; padding: 11px 15px; border-radius: 10px; font-size: .8rem; max-width: 380px; }
 .toast.error { background: var(--red-700); }

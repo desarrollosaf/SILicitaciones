@@ -119,6 +119,18 @@ CREATE TABLE memo_allocations (
   CONSTRAINT fk_allocation_person FOREIGN KEY (personId) REFERENCES people(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+CREATE TABLE documents (
+  id        CHAR(36)     NOT NULL PRIMARY KEY,
+  entity    VARCHAR(20)  NOT NULL,
+  entityId  CHAR(36)     NOT NULL,
+  name      VARCHAR(260) NOT NULL,
+  mimeType  VARCHAR(150) NOT NULL DEFAULT 'application/octet-stream',
+  size      INT UNSIGNED NOT NULL DEFAULT 0,
+  data      LONGBLOB     NOT NULL,
+  createdAt DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_document_entity (entity, entityId)
+) ENGINE=InnoDB;
+
 -- Vista de existencias: cantidad comprometida y disponible por partida.
 CREATE OR REPLACE VIEW partida_stock AS
 SELECT

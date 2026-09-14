@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/api.service';
 import { SessionService } from '../core/session.service';
 import { ToastService } from '../core/toast.service';
-import { Dictamen } from '../core/models';
+import { Dictamen, DocumentMetadata } from '../core/models';
 import { MxnPipe, ShortDatePipe } from '../shared/format.pipe';
 import { BadgeComponent } from '../shared/badge.component';
 
@@ -90,6 +90,23 @@ const EMPTY: Partial<Dictamen> = {
             </select>
           </div>
           <div class="field"><label>Nombre del archivo</label><input class="input" [(ngModel)]="form.fileName"></div>
+
+          <div class="field span-2">
+            <label>Archivos adjuntos</label>
+            <div class="attachment-list">
+              <div class="attachment-row" *ngFor="let doc of documents()">
+                <a [href]="api.documentUrl(doc.id)" target="_blank">{{ doc.name }}</a>
+                <span class="muted">{{ formatSize(doc.size) }}</span>
+                <button class="btn btn-danger btn-sm" [disabled]="!session.isOpen()" (click)="removeDocument(doc)">Eliminar</button>
+              </div>
+              <div class="empty-state" *ngIf="!documents().length">Sin archivos adjuntos.</div>
+            </div>
+            <div class="hint" *ngIf="!form.id">Guarda el dictamen antes de adjuntar archivos.</div>
+            <ng-container *ngIf="form.id">
+              <input #docInput type="file" hidden (change)="uploadDocument($event)">
+              <button class="btn btn-secondary btn-sm" [disabled]="!session.isOpen()" (click)="docInput.click()">Adjuntar archivo</button>
+            </ng-container>
+          </div>
         </div>
         <div class="dialog-footer">
           <button class="btn btn-secondary" (click)="dialogOpen.set(false)">Cancelar</button>
@@ -100,12 +117,13 @@ const EMPTY: Partial<Dictamen> = {
   `,
 })
 export class DictamenesComponent {
-  private readonly api = inject(ApiService);
+  readonly api = inject(ApiService);
   private readonly toasts = inject(ToastService);
   readonly session = inject(SessionService);
 
   readonly rows = signal<Dictamen[]>([]);
   readonly dialogOpen = signal(false);
+  readonly documents = signal<DocumentMetadata[]>([]);
   search = '';
   form: Partial<Dictamen> = { ...EMPTY };
 
@@ -131,9 +149,12 @@ export class DictamenesComponent {
   open(item?: Dictamen): void {
     if (item) {
       this.form = { ...item };
+      this.documents.set([]);
+      this.loadDocuments(item.id);
       this.dialogOpen.set(true);
       return;
     }
+    this.documents.set([]);
     this.api.nextDictamenFolio(this.session.activePeriodId()).subscribe({
       next: ({ folio }) => {
         this.form = { ...EMPTY, folio, date: new Date().toISOString().slice(0, 10), periodId: this.session.activePeriodId() };
@@ -141,6 +162,38 @@ export class DictamenesComponent {
       },
       error: (error) => this.toasts.error(error),
     });
+  }
+
+  loadDocuments(dictamenId: string): void {
+    this.api.documents('dictamen', dictamenId).subscribe({
+      next: (rows) => this.documents.set(rows),
+      error: (error) => this.toasts.error(error),
+    });
+  }
+
+  uploadDocument(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || !this.form.id) return;
+    this.api.uploadDocument('dictamen', this.form.id, file).subscribe({
+      next: () => { this.toasts.show('Archivo adjuntado.'); this.loadDocuments(this.form.id!); },
+      error: (error) => this.toasts.error(error),
+    });
+    input.value = '';
+  }
+
+  removeDocument(doc: DocumentMetadata): void {
+    if (!confirm(`¿Eliminar el archivo ${doc.name}?`)) return;
+    this.api.deleteDocument(doc.id).subscribe({
+      next: () => { this.toasts.show('Archivo eliminado.'); this.loadDocuments(this.form.id!); },
+      error: (error) => this.toasts.error(error),
+    });
+  }
+
+  formatSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   save(): void {

@@ -12,6 +12,8 @@ import { MemosModule } from './modules/memos/memos.module';
 import { StockModule } from './modules/stock/stock.module';
 import { ImportsModule } from './modules/imports/imports.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -27,6 +29,8 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     MemosModule,
     ImportsModule,
     DashboardModule,
+    DocumentsModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

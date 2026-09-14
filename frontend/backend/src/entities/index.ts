@@ -7,6 +7,7 @@ import { Partida } from './partida.entity';
 import { Person } from './person.entity';
 import { Memo } from './memo.entity';
 import { MemoAllocation } from './memo-allocation.entity';
+import { StoredDocument } from './document.entity';
 
 export * from './period.entity';
 export * from './holiday.entity';
@@ -17,5 +18,6 @@ export * from './partida.entity';
 export * from './person.entity';
 export * from './memo.entity';
 export * from './memo-allocation.entity';
+export * from './document.entity';
 
-export const entities = [Period, Holiday, Warehouse, Dictamen, Licitacion, Partida, Person, Memo, MemoAllocation];
+export const entities = [Period, Holiday, Warehouse, Dictamen, Licitacion, Partida, Person, Memo, MemoAllocation, StoredDocument];

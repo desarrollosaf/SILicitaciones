@@ -2,7 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
-  Alert, DashboardSummary, Dictamen, ImportResult, Licitacion, Memo, Partida, Period, Person, Warehouse, WarehouseBalance,
+  Alert, DashboardSummary, Dictamen, DocumentEntityType, DocumentMetadata, ImportResult, Licitacion, Memo, Partida, Period, Person,
+  Warehouse, WarehouseBalance,
 } from './models';
 import { environment } from '../../environments/environment';
 
@@ -108,4 +109,19 @@ export class ApiService {
   importCsv(kind: 'licitaciones' | 'partidas' | 'people', csv: string, periodId?: string): Observable<ImportResult> {
     return this.http.post<ImportResult>(`${BASE}/imports/${kind}`, { csv }, { params: this.params({ periodId }) });
   }
+
+  // Documentos adjuntos
+  documents(entity: DocumentEntityType, entityId: string): Observable<DocumentMetadata[]> {
+    return this.http.get<DocumentMetadata[]>(`${BASE}/documents`, { params: this.params({ entity, entityId }) });
+  }
+  uploadDocument(entity: DocumentEntityType, entityId: string, file: File): Observable<DocumentMetadata> {
+    const body = new FormData();
+    body.append('entity', entity);
+    body.append('entityId', entityId);
+    body.append('name', file.name);
+    body.append('file', file);
+    return this.http.post<DocumentMetadata>(`${BASE}/documents`, body);
+  }
+  deleteDocument(id: string) { return this.http.delete(`${BASE}/documents/${id}`); }
+  documentUrl(id: string): string { return `${BASE}/documents/${id}/content`; }
 }
